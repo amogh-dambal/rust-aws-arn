@@ -17,6 +17,7 @@ builders = ["lazy_static"]
 serde = ["dep:serde"]
 
 [dependencies]
+bon = "3.3.2"
 
 # Optional dependencies
 lazy_static = { optional = true, version = "1.4.0" }

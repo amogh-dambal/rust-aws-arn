@@ -1,8 +1,8 @@
-use aws_arn::{
-    types::{Partition, Region, Service},
-    AccountIdentifier, Arn, IdentifierLike, ResourceIdentifier,
-};
 use std::str::FromStr;
+
+use aws_arn::{
+    AccountIdentifier, Arn, IdentifierLike, Partition, Region, ResourceIdentifier, Service,
+};
 
 fn parse_and_compare(test_arn: &str, expected: Arn) {
     let result = Arn::from_str(test_arn);
