@@ -15,7 +15,7 @@ use std::fmt::{Debug, Display, Formatter, Result};
 // ------------------------------------------------------------------------------------------------
 
 ///
-/// Errors that may arise parsing an ResourceName with `FromStr::from_str()`.
+/// Errors that may arise parsing an Arn with `FromStr::from_str()`.
 ///
 #[derive(Debug, PartialEq)]
 pub enum Error {

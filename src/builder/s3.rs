@@ -1,5 +1,5 @@
 /*!
-Provides a set of simple helper functions to make ResourceNames for the S3 service.
+Provides a set of simple helper functions to make Arns for the S3 service.
 
 These resource definitions ae take from the AWS
 [documentation]( https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazons3.html#amazons3-resources-for-iam-policies)
@@ -8,7 +8,7 @@ These resource definitions ae take from the AWS
 use crate::builder::ArnBuilder;
 use crate::types::Partition;
 use crate::types::Service::S3;
-use crate::{AccountIdentifier, Identifier, ResourceIdentifier, ResourceName};
+use crate::{AccountIdentifier, Arn, Identifier, ResourceIdentifier};
 
 // ------------------------------------------------------------------------------------------------
 // Public Functions
@@ -17,7 +17,7 @@ use crate::{AccountIdentifier, Identifier, ResourceIdentifier, ResourceName};
 ///
 /// `arn:${Partition}:s3:::${BucketName}`
 ///
-pub fn bucket_in(partition: Identifier, bucket_name: Identifier) -> ResourceName {
+pub fn bucket_in(partition: Identifier, bucket_name: Identifier) -> Arn {
     ArnBuilder::service_id(S3.into())
         .in_partition_id(partition)
         .is(bucket_name.into())
@@ -27,18 +27,14 @@ pub fn bucket_in(partition: Identifier, bucket_name: Identifier) -> ResourceName
 ///
 /// `arn:aws:s3:::${BucketName}`
 ///
-pub fn bucket(bucket_name: Identifier) -> ResourceName {
+pub fn bucket(bucket_name: Identifier) -> Arn {
     bucket_in(Partition::default().into(), bucket_name)
 }
 
 ///
 /// `arn:${Partition}:s3:::${BucketName}/${ObjectName}`
 ///
-pub fn object_in(
-    partition: Identifier,
-    bucket_name: Identifier,
-    object_name: Identifier,
-) -> ResourceName {
+pub fn object_in(partition: Identifier, bucket_name: Identifier, object_name: Identifier) -> Arn {
     ArnBuilder::service_id(S3.into())
         .in_partition_id(partition)
         .is(ResourceIdentifier::from_id_path(&[
@@ -51,23 +47,20 @@ pub fn object_in(
 ///
 /// `arn:aws:s3:::${BucketName}/${ObjectName}`
 ///
-pub fn object(bucket_name: Identifier, object_name: Identifier) -> ResourceName {
+pub fn object(bucket_name: Identifier, object_name: Identifier) -> Arn {
     object_in(Partition::default().into(), bucket_name, object_name)
 }
 
 ///
 /// `arn:aws:s3:::${BucketName}/${ObjectName}`
 ///
-/// This function will panic if `bucket` is not an ResourceName for an S3 bucket.
+/// This function will panic if `bucket` is not an Arn for an S3 bucket.
 ///
-pub fn object_from(bucket: &ResourceName, object_name: Identifier) -> ResourceName {
+pub fn object_from(bucket: &Arn, object_name: Identifier) -> Arn {
     if bucket.service != S3.into() {
-        panic!(
-            "You can't make an S3 object from a {} ResourceName.",
-            bucket.service
-        );
+        panic!("You can't make an S3 object from a {} Arn.", bucket.service);
     }
-    ResourceName {
+    Arn {
         resource: ResourceIdentifier::from_path(&[bucket.resource.clone(), object_name.into()]),
         ..bucket.clone()
     }
@@ -81,7 +74,7 @@ pub fn job_in(
     region: Identifier,
     account: AccountIdentifier,
     job_id: Identifier,
-) -> ResourceName {
+) -> Arn {
     ArnBuilder::service_id(S3.into())
         .in_partition_id(partition)
         .in_region_id(region)
@@ -93,6 +86,6 @@ pub fn job_in(
 ///
 /// `arn:aws:s3:${Region}:${Account}:job/${JobId}`
 ///
-pub fn job(region: Identifier, account: AccountIdentifier, job_id: Identifier) -> ResourceName {
+pub fn job(region: Identifier, account: AccountIdentifier, job_id: Identifier) -> Arn {
     job_in(Partition::default().into(), region, account, job_id)
 }

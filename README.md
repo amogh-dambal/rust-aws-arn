@@ -22,15 +22,15 @@ these strings correclt in the first place.
 # ARN Types
 
 This crate provides a number of levels of ARN manipulation, the first is the
-direct construction of an ARN type using the core `ResourceName`,
+direct construction of an ARN type using the core `Arn`,
 `Identifier`, `AccountIdentifier`, and `ResourceIdentifier` types.
 
 ```rust
-use aws_arn::{ResourceName, ResourceIdentifier};
+use aws_arn::{Arn, ResourceIdentifier};
 use aws_arn::known::{Partition, Service};
 use std::str::FromStr;
 
-let arn = ResourceName {
+let arn = Arn {
     partition: Some(Partition::default().into()),
     service: Service::S3.into(),
     region: None,
@@ -39,15 +39,15 @@ let arn = ResourceName {
 };
 ```
 
-In the example above, as we are defining a minimal ResourceName we could use one of the
+In the example above, as we are defining a minimal Arn we could use one of the
 defined constructor functions.
 
 ```rust
-use aws_arn::{ResourceName, ResourceIdentifier};
+use aws_arn::{Arn, ResourceIdentifier};
 use aws_arn::known::Service;
 use std::str::FromStr;
 
-let arn = ResourceName::aws(
+let arn = Arn::aws(
     Service::S3.into(),
     ResourceIdentifier::from_str("mythings/thing-1").unwrap()
 );
@@ -56,12 +56,12 @@ let arn = ResourceName::aws(
 Alternatively, using `FromStr,` you can parse an existing ARN string into an ARN value.
 
 ```rust
-use aws_arn::ResourceName;
+use aws_arn::Arn;
 use std::str::FromStr;
 
-let arn: ResourceName = "arn:aws:s3:::mythings/thing-1"
+let arn: Arn = "arn:aws:s3:::mythings/thing-1"
     .parse()
-    .expect("didn't look like an ResourceName");
+    .expect("didn't look like an Arn");
 ```
 
 Another approach is to use a more readable *builder* which also allows you to ignore those fields
@@ -70,10 +70,10 @@ in the ARN you don't always need and uses a more fluent style of ARN constructio
 ```rust
 use aws_arn::builder::{ArnBuilder, ResourceBuilder};
 use aws_arn::known::{Partition, Service};
-use aws_arn::{ResourceName, Identifier, IdentifierLike};
+use aws_arn::{Arn, Identifier, IdentifierLike};
 use std::str::FromStr;
 
-let arn: ResourceName = ArnBuilder::service_id(Service::S3.into())
+let arn: Arn = ArnBuilder::service_id(Service::S3.into())
     .resource(ResourceBuilder::named(Identifier::from_str("mythings").unwrap())
         .resource_name(Identifier::new_unchecked("my-layer"))
         .build_resource_path())
@@ -119,10 +119,10 @@ we have include the following capabilities as optional features.
 
 **Version 0.3.0**
 
-* **Breaking Change**: Renamed `ARN` to `ResourceName`.
+* **Breaking Change**: Renamed `ARN` to `Arn`.
 * **Breaking Change**: Renamed `ArnError` to `Error`.
 * Added interface for common Identifier operations.
-* Added variable expansion for `ResourceIdentifier` and `ResourceName`.
+* Added variable expansion for `ResourceIdentifier` and `Arn`.
 * Added more unit tests.
 
 **Version 0.2.1**

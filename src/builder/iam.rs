@@ -1,15 +1,15 @@
 /*!
-Provides a set of simple helper functions to make ResourceNames for the IAM service.
+Provides a set of simple helper functions to make Arns for the IAM service.
 
 These resource definitions ae take from the AWS
 [documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/list_identityandaccessmanagement.html#identityandaccessmanagement-resources-for-iam-policies).
-With the exception  of the root account ResourceName described
+With the exception  of the root account Arn described
 [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns).
 [*/
 
 use crate::builder::ArnBuilder;
 use crate::known::Service::IdentityAccessManagement;
-use crate::{AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier, ResourceName};
+use crate::{AccountIdentifier, Arn, Identifier, IdentifierLike, ResourceIdentifier};
 
 // ------------------------------------------------------------------------------------------------
 // Public Functions
@@ -18,7 +18,7 @@ use crate::{AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier, R
 ///
 /// `arn:aws:iam::123456789012:root`
 ///
-pub fn root(account: AccountIdentifier) -> ResourceName {
+pub fn root(account: AccountIdentifier) -> Arn {
     ArnBuilder::service_id(IdentityAccessManagement.into())
         .owned_by(account)
         .is(ResourceIdentifier::new_unchecked("root"))
@@ -28,11 +28,7 @@ pub fn root(account: AccountIdentifier) -> ResourceName {
 ///
 /// `arn:${Partition}:iam::${Account}:user/${UserNameWithPath}`
 ///
-pub fn user(
-    partition: Identifier,
-    account: AccountIdentifier,
-    user_name: Identifier,
-) -> ResourceName {
+pub fn user(partition: Identifier, account: AccountIdentifier, user_name: Identifier) -> Arn {
     ArnBuilder::service_id(IdentityAccessManagement.into())
         .in_partition_id(partition)
         .owned_by(account)
@@ -46,11 +42,7 @@ pub fn user(
 ///
 /// `arn:${Partition}:iam::${Account}:role/${RoleNameWithPath}`
 ///
-pub fn role(
-    partition: Identifier,
-    account: AccountIdentifier,
-    role_name: Identifier,
-) -> ResourceName {
+pub fn role(partition: Identifier, account: AccountIdentifier, role_name: Identifier) -> Arn {
     ArnBuilder::service_id(IdentityAccessManagement.into())
         .in_partition_id(partition)
         .owned_by(account)
@@ -64,11 +56,7 @@ pub fn role(
 ///
 /// `arn:${Partition}:iam::${Account}:group/${GroupNameWithPath}`
 ///
-pub fn group(
-    partition: Identifier,
-    account: AccountIdentifier,
-    group_name: Identifier,
-) -> ResourceName {
+pub fn group(partition: Identifier, account: AccountIdentifier, group_name: Identifier) -> Arn {
     ArnBuilder::service_id(IdentityAccessManagement.into())
         .in_partition_id(partition)
         .owned_by(account)
@@ -82,11 +70,7 @@ pub fn group(
 ///
 /// `arn:${Partition}:iam::${Account}:policy/${PolicyNameWithPath}`
 ///
-pub fn policy(
-    partition: Identifier,
-    account: AccountIdentifier,
-    policy_name: Identifier,
-) -> ResourceName {
+pub fn policy(partition: Identifier, account: AccountIdentifier, policy_name: Identifier) -> Arn {
     ArnBuilder::service_id(IdentityAccessManagement.into())
         .in_partition_id(partition)
         .owned_by(account)
