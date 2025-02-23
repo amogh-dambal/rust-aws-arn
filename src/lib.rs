@@ -4,11 +4,9 @@
 //!
 //! The ARN is a key component of all AWS service APIs, yet nearly
 //! all client toolkits treat it as a string. While this may be a
-//! reasonable and expedient decision, there is a need to ensure validity and correctness
-//! of AWS ARN
-//! AWS ARNs for it seems there might be a need to not
-//! only ensure correctness of Arns with validators but also
-//! constructors that allow making these strings correclt in the first place.
+//! reasonable and expedient decision, there are use-cases that require
+//! applications and libraries to ensure the validity and correctness
+//! of AWS ARNs.
 //!
 //! # `ResourceName` types
 //! This crate provides multiple interfaces to manipulate `ResourceName`s.
@@ -60,6 +58,7 @@
 //!
 //! # Features
 //! * `serde`: enables (de)serialization using [`serde`](). This feature is enabled by default.
+//! * `builders`: enables fluent builders using [`bon`](). This feature is enabled by default.
 //!/
 
 #![warn(
@@ -257,8 +256,8 @@ impl ResourceName {
     }
 }
 
-// #[cfg(doctest)]
-// doc_comment::doctest!("../README.md");
+#[cfg(doctest)]
+doc_comment::doctest!("../README.md");
 
 #[cfg(feature = "builders")]
 pub mod builder;

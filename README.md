@@ -13,47 +13,46 @@ strings.
 [![GitHub stars](https://img.shields.io/github/stars/johnstonskj/rust-aws-arn.svg)](https://github.com/johnstonskj/rust-aws-arn/stargazers)
 
 
-The ARN is a key component of all AWS service APIs and yet nearly all client
-toolkits treat it simply as a string. While this may be a reasonable and
-expedient decision, it seems there might be a need to not only ensure
-correctness of ARNs with validators but also constructors that allow making
-these strings correclt in the first place.
+The ARN (Amazon Resource Name) is a key component of all AWS service APIs, yet nearly all client
+toolkits treat it as a simple string. While this may be a reasonable and
+expedient decision, there are use-cases that require applications and libraries to validate and ensure
+the correctness of ARNs.
 
 # ARN Types
 
-This crate provides a number of levels of ARN manipulation, the first is the
-direct construction of an ARN type using the core `ResourceName`,
+This crate provides multiple interfaces to manipulate ARNs. The first
+is the direct construction of an ARN type using the core `ResourceName`,
 `Identifier`, `AccountIdentifier`, and `ResourceIdentifier` types.
 
 ```rust
 use aws_arn::{ResourceName, ResourceIdentifier};
-use aws_arn::known::{Partition, Service};
+use aws_arn::{Partition, Service};
 use std::str::FromStr;
 
 let arn = ResourceName {
-    partition: Some(Partition::default().into()),
-    service: Service::S3.into(),
+    partition: Partition::default(),
+    service: Service::S3,
     region: None,
     account_id: None,
     resource: ResourceIdentifier::from_str("mythings/thing-1").unwrap()
 };
 ```
-
-In the example above, as we are defining a minimal ResourceName we could use one of the
-defined constructor functions.
+In the example above, as we are defining a minimal ResourceName. However, we could
+also use one of the defined constructor functions.
 
 ```rust
 use aws_arn::{ResourceName, ResourceIdentifier};
-use aws_arn::known::Service;
+use aws_arn::Service;
 use std::str::FromStr;
 
 let arn = ResourceName::aws(
-    Service::S3.into(),
+    Service::S3,
     ResourceIdentifier::from_str("mythings/thing-1").unwrap()
 );
 ```
 
-Alternatively, using `FromStr,` you can parse an existing ARN string into an ARN value.
+Alternatively, using `FromStr,` you can parse a ResourceName value directly from a
+`String` or `&str`.
 
 ```rust
 use aws_arn::ResourceName;
@@ -64,26 +63,25 @@ let arn: ResourceName = "arn:aws:s3:::mythings/thing-1"
     .expect("didn't look like an ResourceName");
 ```
 
-Another approach is to use a more readable *builder* which also allows you to ignore those fields
-in the ARN you don't always need and uses a more fluent style of ARN construction.
+Another approach is to use a more readable, fluent *builder*, which allows you to omit unneeded fields in the ARN.
 
 ```rust
 use aws_arn::builder::{ResourceNameBuilder, ResourceBuilder};
-use aws_arn::known::{Partition, Service};
+use aws_arn::{Partition, Service};
 use aws_arn::{ResourceName, Identifier, IdentifierLike};
 use std::str::FromStr;
 
-let arn: ResourceName = ResourceNameBuilder::service_id(Service::S3.into())
+let arn: ResourceName = ResourceName::builder()
+    .service(Service::S3)
     .resource(ResourceBuilder::named(Identifier::from_str("mythings").unwrap())
         .resource_name(Identifier::new_unchecked("my-layer"))
         .build_resource_path())
-    .in_partition_id(Partition::Aws.into())
-    .into();
+    .in_partition(Partition::Aws)
+    .build();
 ```
 
-Finally, it is possible to use resource-type specific functions that allow an even more direct and
-simple construction (module `aws_arn::builder::{service}` - *service builder functions*, although
-at this time there are few supported services.
+Finally, you can use resource-specific functions that allow an even more direct and
+simple construction (module `aws_arn::builder::{service}` - *service builder functions* of ARNs, although at this time there are few supported services.
 
 ```rust
 use aws_arn::builder::s3;
@@ -96,22 +94,21 @@ let arn = s3::object(
 );
 ```
 
-For more, see the AWS documentation for [Amazon Resource Name
-(ARN)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) documentation.
+For more, see the AWS documentation for [Amazon Resource Names
+(ARN)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html).
 
-# Optional Features
+# Features
 
-This crate has attempted to be as lean as possible, with a really minimal set of dependencies,
-we have include the following capabilities as optional features.
+This crate attempts to provide the best of both worlds, with a feature-rich
+experience that can be granularly controlled using `cargo` features.
 
-* `builders` adds the builder module. This feature is enabled by default, it also requires the
-  `known` feature.
-* `known` adds a module containing enums for partitions, regions, and services.
-  This feature is enabled by default.
-* `serde` adds derived `Serialize` and `Deserialize` implementations for the `ARN` and
-  `Resource` types. This feature is enabled by default.
+* `builders` adds the builder module. This feature is enabled by default.
+* `serde` adds derived `Serialize` and `Deserialize` implementations for the `ARN` and `Resource` types. This feature is enabled by default.
 
 ## Changes
+
+**Version 0.4**
+* **Breaking Change**: TODO:
 
 **Version 0.3.1**
 

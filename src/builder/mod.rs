@@ -25,9 +25,10 @@
 //! The following shows the construction of an AWS versioned layer ResourceName.
 //! TODO: Update the documentation
 
+pub use crate::ResourceNameBuilder;
 use crate::{
     resource_name_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
-    AccountIdentifier, Identifier, IdentifierLike, Region, ResourceIdentifier, ResourceNameBuilder,
+    AccountIdentifier, Identifier, IdentifierLike, Region, ResourceIdentifier,
 };
 
 impl<S: State> ResourceNameBuilder<S> {
