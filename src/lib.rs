@@ -78,6 +78,8 @@
     unused_results
 )]
 
+#[cfg(feature = "builders")]
+use bon::builder;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -109,19 +111,28 @@ use types::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "builders", derive(bon::Builder))]
 pub struct Arn {
     /// The partition that the resource is in. For standard AWS Regions, the partition is` aws`.
     /// If you have resources in other partitions, the partition is `aws-partitionname`. For
     /// example, the partition for resources in the China partition is `aws-cn`.
+    #[cfg(feature = "builders")]
+    #[builder(into, name = "in_partition", default = Partition::Aws)]
     pub partition: Partition,
     /// The service namespace that identifies the AWS service.
+    #[cfg(feature = "builders")]
+    #[builder(into)]
     pub service: Service,
     /// The AWS region that the resource resides in. Some resources - like S3 buckets - are considered
     /// "global", and thus the ARN does not require a region.
+    #[cfg(feature = "builders")]
+    #[builder(into, name = "in_region")]
     pub region: Option<Region>,
     /// The ID of the AWS account that owns the resource, without the hyphens. For example,
     /// `123456789012`. Some resources, like S3 buckets, have ARNs that do not include the AWS
     /// account ID.
+    #[cfg(feature = "builders")]
+    #[builder(into, name = "in_account")]
     pub account_id: Option<AccountIdentifier>,
     /// The content of this part of the Arn varies by service. A resource identifier can
     /// be the name or ID of the resource (for example, `user/Bob` or
@@ -129,6 +140,8 @@ pub struct Arn {
     /// identifiers include a parent resource
     /// (`sub-resource-type/parent-resource/sub-resource`) or a qualifier such as a
     /// version (`resource-type:resource-name:qualifier`).
+    #[cfg(feature = "builders")]
+    #[builder(into)]
     pub resource: ResourceIdentifier,
 }
 

@@ -26,23 +26,48 @@
 //!
 //!
 
-use crate::known::{Partition, Region, Service};
-use crate::types::Partition;
-use crate::{AccountIdentifier, Arn, Identifier, IdentifierLike, ResourceIdentifier};
+use crate::{
+    arn_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
+    AccountIdentifier, ArnBuilder, Identifier, IdentifierLike, Region, ResourceIdentifier,
+};
 
-// ------------------------------------------------------------------------------------------------
-// Public Types
-// ------------------------------------------------------------------------------------------------
+impl<S: State> ArnBuilder<S> {
+    fn and_region(self, region: impl Into<Region>) -> ArnBuilder<SetInRegion<S>>
+    where
+        S::InRegion: IsUnset,
+    {
+        self.in_region(region)
+    }
 
-///
-/// Builder type for an AWS `Arn`.
-///
-#[derive(Clone, Debug)]
-pub struct ArnBuilder {
-    arn: Arn,
+    fn in_any_region(self) -> ArnBuilder<SetInRegion<S>>
+    where
+        S::InRegion: IsUnset,
+    {
+        self.maybe_in_region(None::<Region>)
+    }
+
+    fn and_account(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    where
+        S::InAccount: IsUnset,
+    {
+        self.in_account(account)
+    }
+
+    fn owned_by(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    where
+        S::InAccount: IsUnset,
+    {
+        self.in_account(account)
+    }
+
+    fn is(self, resource: impl Into<ResourceIdentifier>) -> ArnBuilder<SetResource<S>>
+    where
+        S::Resource: IsUnset,
+    {
+        self.resource(resource)
+    }
 }
 
-///
 /// Builder type for a `ResourceIdentifier`.
 ///
 /// The methods `build_resource_path` and `build_qualified_id` are used to construct identifiers
@@ -52,125 +77,6 @@ pub struct ArnBuilder {
 pub struct ResourceBuilder {
     resource: Vec<ResourceIdentifier>,
 }
-
-// ------------------------------------------------------------------------------------------------
-// Implementations
-// ------------------------------------------------------------------------------------------------
-
-impl From<ArnBuilder> for Arn {
-    fn from(v: ArnBuilder) -> Self {
-        v.arn
-    }
-}
-
-impl From<&mut ArnBuilder> for Arn {
-    fn from(v: &mut ArnBuilder) -> Self {
-        v.arn.clone()
-    }
-}
-
-impl ArnBuilder {
-    /// Construct an Arn for the specified `service`.
-    pub fn service(service: Service) -> Self {
-        Self::service_id(service.into())
-    }
-
-    /// Construct an Arn for the specified `service`.
-    pub fn service_id(service: Service) -> Self {
-        Self {
-            arn: Arn {
-                partition: Partition::Aws,
-                service,
-                region: None,
-                account_id: None,
-                resource: ResourceIdentifier::default(),
-            },
-        }
-    }
-
-    /// Set a specific `partition` for this Arn.
-    pub fn in_partition<P: Into<Partition>>(&mut self, partition: P) -> &mut Self {
-        self.arn.partition = partition.into();
-        self
-    }
-
-    /// Set a specific `partition` for this Arn.
-    pub fn in_default_partition(&mut self) -> &mut Self {
-        self.arn.partition = Partition::default();
-        self
-    }
-
-    /// Set a specific `region` for this Arn.
-    pub fn in_region<R: Into<Region>>(&mut self, region: R) -> &mut Self {
-        self.arn.region = region.into();
-        self
-    }
-
-    /// Set a specific `region` for this Arn.
-    pub fn and_region(&mut self, region: Region) -> &mut Self {
-        self.in_region_id(region.into())
-    }
-
-    /// Set a specific `region` for this Arn.
-    pub fn and_region_id(&mut self, region: Identifier) -> &mut Self {
-        self.in_region_id(region)
-    }
-
-    /// Set `region` to a wildcard for this Arn.
-    pub fn in_any_region(&mut self) -> &mut Self {
-        self.in_region_id(Identifier::default())
-    }
-
-    /// Set a specific `account` for this Arn.
-    pub fn in_account(&mut self, account: AccountIdentifier) -> &mut Self {
-        self.arn.account_id = Some(account);
-        self
-    }
-
-    /// Set a specific `account` for this Arn.
-    pub fn and_account(&mut self, account: AccountIdentifier) -> &mut Self {
-        self.in_account(account)
-    }
-
-    /// Set a specific `account` for this Arn.
-    pub fn owned_by(&mut self, account: AccountIdentifier) -> &mut Self {
-        self.in_account(account)
-    }
-
-    /// Set `account` to a wildcard for this Arn.
-    pub fn in_any_account(&mut self) -> &mut Self {
-        self.in_account(AccountIdentifier::default())
-    }
-
-    /// Set a specific `resource` for this Arn.
-    pub fn resource(&mut self, resource: ResourceIdentifier) -> &mut Self {
-        self.arn.resource = resource;
-        self
-    }
-
-    /// Set a specific `resource` for this Arn.
-    pub fn is(&mut self, resource: ResourceIdentifier) -> &mut Self {
-        self.resource(resource)
-    }
-
-    /// Set a specific `resource` for this Arn.
-    pub fn a(&mut self, resource: ResourceIdentifier) -> &mut Self {
-        self.resource(resource)
-    }
-
-    /// Set `resource` to a wildcard for this Arn.
-    pub fn any_resource(&mut self) -> &mut Self {
-        self.arn.resource = ResourceIdentifier::any();
-        self
-    }
-
-    /// Set `resource` to a wildcard for this Arn.
-    pub fn for_any_resource(&mut self) -> &mut Self {
-        self.any_resource()
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
 
 impl From<ResourceIdentifier> for ResourceBuilder {
     fn from(v: ResourceIdentifier) -> Self {
@@ -255,14 +161,7 @@ impl ResourceBuilder {
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
-
 pub mod cognito;
-
 pub mod iam;
-
 pub mod lambda;
-
 pub mod s3;
