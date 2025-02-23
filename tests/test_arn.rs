@@ -1,11 +1,11 @@
 use std::str::FromStr;
 
 use aws_arn::{
-    AccountIdentifier, Arn, IdentifierLike, Partition, Region, ResourceIdentifier, Service,
+    AccountIdentifier, IdentifierLike, Partition, Region, ResourceIdentifier, ResourceName, Service,
 };
 
-fn parse_and_compare(test_arn: &str, expected: Arn) {
-    let result = Arn::from_str(test_arn);
+fn parse_and_compare(test_arn: &str, expected: ResourceName) {
+    let result = ResourceName::from_str(test_arn);
     assert!(result.is_ok(), "expected OK but received {:?}", result);
     let arn = result.unwrap();
     assert_eq!(arn, expected);
@@ -13,7 +13,7 @@ fn parse_and_compare(test_arn: &str, expected: Arn) {
 
 #[test]
 fn test_valid_arn_to_string() {
-    let arn = Arn {
+    let arn = ResourceName {
         partition: Partition::Aws,
         service: Service::S3,
         region: None,
@@ -25,7 +25,7 @@ fn test_valid_arn_to_string() {
 
 #[test]
 fn test_valid_arn_to_string_wild() {
-    let arn = Arn {
+    let arn = ResourceName {
         partition: Partition::Aws,
         service: Service::S3,
         region: None,
@@ -37,7 +37,7 @@ fn test_valid_arn_to_string_wild() {
 
 #[test]
 fn test_valid_arn_to_string_wild_more() {
-    let arn = Arn {
+    let arn = ResourceName {
         partition: Partition::Aws,
         service: Service::S3,
         region: None,
@@ -51,7 +51,7 @@ fn test_valid_arn_to_string_wild_more() {
 fn test_arn_from_valid_str() {
     parse_and_compare(
         "arn:aws:s3:us-east-1:123456789012:job/23476",
-        Arn {
+        ResourceName {
             partition: Partition::Aws,
             service: Service::S3,
             region: Some(Region::UsEast1),
@@ -63,8 +63,9 @@ fn test_arn_from_valid_str() {
 
 #[test]
 fn test_github_issues_2() {
-    let result =
-        Arn::from_str("arn:aws:cloudwatch:us-west-2:123456789012:alarm:Production:LB:High4xx");
+    let result = ResourceName::from_str(
+        "arn:aws:cloudwatch:us-west-2:123456789012:alarm:Production:LB:High4xx",
+    );
     assert!(result.is_ok());
     let arn = result.unwrap();
     assert_eq!(arn.partition, Partition::Aws);

@@ -13,8 +13,8 @@
 //! partition in commonly left to default to "aws" there are also a set of `{noun}_in()` functions
 //! that take a partition, and corresponding `{noun}()` functions which do not.
 //!
-//! In some cases where an Arn may be dependent on another, for example an S3 object Arn might be
-//! constructed from an existing bucket Arn, additional `{noun}_from(other,...)` functions will
+//! In some cases where an ResourceName may be dependent on another, for example an S3 object ResourceName might be
+//! constructed from an existing bucket ResourceName, additional `{noun}_from(other,...)` functions will
 //! be provided.
 //!
 //! Note that the final `build()` function will call `validate()`, and so it is possible to call
@@ -22,18 +22,18 @@
 //!
 //! # Example
 //!
-//! The following shows the construction of an AWS versioned layer Arn.
+//! The following shows the construction of an AWS versioned layer ResourceName.
 //! TODO: Update the documentation
 
 use crate::{
-    arn_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
-    AccountIdentifier, ArnBuilder, Identifier, IdentifierLike, Region, ResourceIdentifier,
+    resource_name_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
+    AccountIdentifier, Identifier, IdentifierLike, Region, ResourceIdentifier, ResourceNameBuilder,
 };
 
-impl<S: State> ArnBuilder<S> {
+impl<S: State> ResourceNameBuilder<S> {
     /// Specifies the AWS region where the resource described by the ARN being built
     /// is located.
-    pub fn and_region(self, region: impl Into<Region>) -> ArnBuilder<SetInRegion<S>>
+    pub fn and_region(self, region: impl Into<Region>) -> ResourceNameBuilder<SetInRegion<S>>
     where
         S::InRegion: IsUnset,
     {
@@ -42,7 +42,7 @@ impl<S: State> ArnBuilder<S> {
 
     /// Used for ARNs that describe resources that have no associated region, e.g.
     /// S3 buckets or IAM roles.
-    pub fn in_any_region(self) -> ArnBuilder<SetInRegion<S>>
+    pub fn in_any_region(self) -> ResourceNameBuilder<SetInRegion<S>>
     where
         S::InRegion: IsUnset,
     {
@@ -50,7 +50,10 @@ impl<S: State> ArnBuilder<S> {
     }
 
     /// Specifies the AWS account that owns the resource for which we are constructing an ARN.
-    pub fn and_account(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    pub fn and_account(
+        self,
+        account: impl Into<AccountIdentifier>,
+    ) -> ResourceNameBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {
@@ -58,7 +61,10 @@ impl<S: State> ArnBuilder<S> {
     }
 
     /// A more readable alias for `and_account`
-    pub fn owned_by(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    pub fn owned_by(
+        self,
+        account: impl Into<AccountIdentifier>,
+    ) -> ResourceNameBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {
@@ -66,7 +72,7 @@ impl<S: State> ArnBuilder<S> {
     }
 
     /// Specifies the AWS resource being described by the AWS ARN.
-    pub fn is(self, resource: impl Into<ResourceIdentifier>) -> ArnBuilder<SetResource<S>>
+    pub fn is(self, resource: impl Into<ResourceIdentifier>) -> ResourceNameBuilder<SetResource<S>>
     where
         S::Resource: IsUnset,
     {

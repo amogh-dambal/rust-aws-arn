@@ -28,7 +28,7 @@ pub(crate) const REQUIRED_COMPONENT_COUNT: usize = 6;
 static REGEX_VARIABLE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\$\{([^$}]+)\}").expect("failed to initialize regex"));
 
-/// This trait is implemented by the `Arn` component types. It
+/// This trait is implemented by the `ResourceName` component types. It
 /// represents a string-based identifier that is generally constructed using
 /// `FromStr::from_str`.
 ///
@@ -71,24 +71,16 @@ where
 }
 
 /// A string value that is used to capture the partition, service, and region components
-/// of an Arn. These are ASCII only, may not include control characters, spaces, '/', or ':'.
+/// of an ResourceName. These are ASCII only, may not include control characters, spaces, '/', or ':'.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Identifier(String);
 
-///
-/// A string value that is used to capture the account ID component
-/// of an Arn. These are ASCII digits only and a fixed length of 12 characters.
-///
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct AccountIdentifier(String);
-
-/// A string value that is used to capture the resource component of an Arn. These are ASCII only,
+/// A string value that is used to capture the resource component of an ResourceName. These are ASCII only,
 /// may not include control characters but unlike `Identifier` they may include spaces, '/', and ':'.
 ///
-/// > *The content of this part of the Arn varies by service. A resource identifier can be the name
+/// > *The content of this part of the ResourceName varies by service. A resource identifier can be the name
 /// > or ID of the resource (for example, `user/Bob` or `instance/i-1234567890abcdef0`) or a
 /// > resource path. For example, some resource identifiers include a parent resource
 /// > (`sub-resource-type/parent-resource/sub-resource`) or a qualifier such as a version
@@ -153,7 +145,14 @@ impl IdentifierLike for Identifier {
     }
 }
 
-// ------------------------------------------------------------------------------------------------
+static ACCOUNT_ID_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^([0-9]{12}|\*)$").expect("failed to init account ID regex"));
+
+/// A string value that is used to capture the account ID component
+/// of an ResourceName. These are ASCII digits only and a fixed length of 12 characters.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+pub struct AccountIdentifier(String);
 
 impl Display for AccountIdentifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -165,11 +164,9 @@ impl FromStr for AccountIdentifier {
     type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if Self::is_valid(s) {
-            Ok(Self(s.to_string()))
-        } else {
-            Err(ArnError::InvalidAccountId(s.to_string()))
-        }
+        Self::is_valid(s)
+            .then_some(Self(s.to_string()))
+            .ok_or(ArnError::InvalidAccountId(s.to_string()))
     }
 }
 
@@ -193,12 +190,7 @@ impl IdentifierLike for AccountIdentifier {
     }
 
     fn is_valid(s: &str) -> bool {
-        (s.len() == 12 && s.chars().all(|c| c.is_ascii_digit()))
-            || (!s.is_empty()
-                && s.len() <= 12
-                && s.chars()
-                    .all(|c| c.is_ascii_digit() || c == CHAR_WILD_ONE || c == CHAR_WILD_ANY)
-                && s.chars().any(|c| c == CHAR_WILD_ONE || c == CHAR_WILD_ANY))
+        ACCOUNT_ID_REGEX.is_match(s)
     }
 }
 

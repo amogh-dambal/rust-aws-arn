@@ -1,9 +1,9 @@
-use aws_arn::{AccountIdentifier, Arn, Identifier, Region, ResourceIdentifier, Service};
+use aws_arn::{AccountIdentifier, Identifier, Region, ResourceIdentifier, ResourceName, Service};
 use std::str::FromStr;
 
 #[test]
 fn test_s3_bucket() {
-    let arn: Arn = Arn::builder()
+    let arn: ResourceName = ResourceName::builder()
         .service(Service::S3)
         .resource(ResourceIdentifier::from_str("my-bucket").unwrap())
         .build();
@@ -12,7 +12,7 @@ fn test_s3_bucket() {
 
 #[test]
 fn test_lambda_layer() {
-    let arn: Arn = Arn::builder()
+    let arn: ResourceName = ResourceName::builder()
         .service(Service::Lambda)
         .resource(ResourceIdentifier::from_qualified_id(&[
             Identifier::from_str("layer").unwrap(),

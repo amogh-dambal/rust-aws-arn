@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 
 /// Any error that may arise from handling an ARN using this crate.
-/// Errors that may arise parsing an Arn with `FromStr::from_str()`.
+/// Errors that may arise parsing an ResourceName with `FromStr::from_str()`.
 #[derive(Debug, thiserror::Error, Clone, PartialEq, Eq)]
 pub enum ArnError {
     /// String length must be greater than 8 corresponding to `"arn:::::"`.

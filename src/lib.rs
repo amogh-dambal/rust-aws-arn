@@ -10,17 +10,17 @@
 //! only ensure correctness of Arns with validators but also
 //! constructors that allow making these strings correclt in the first place.
 //!
-//! # `Arn` types
-//! This crate provides multiple interfaces to manipulate `Arn`s.
-//! The first is the direct construction of an `Arn` using the core types:
-//! [`Arn`], [`AccountIdentifier`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
+//! # `ResourceName` types
+//! This crate provides multiple interfaces to manipulate `ResourceName`s.
+//! The first is the direct construction of an `ResourceName` using the core types:
+//! [`ResourceName`], [`AccountIdentifier`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
 //!
 //! ```rust
-//! use aws_arn::{Arn, ResourceIdentifier};
+//! use aws_arn::{ResourceName, ResourceIdentifier};
 //! use aws_arn::{Partition, Region, Service};
 //! use std::str::FromStr;
 //!
-//! let arn = Arn {
+//! let arn = ResourceName {
 //!     partition: Partition::default(),
 //!     service: Service::S3,
 //!     region: None,
@@ -29,34 +29,34 @@
 //! };
 //! ```
 //!
-//! In the example above, as we are defining a minimal Arn. However, we could
+//! In the example above, as we are defining a minimal ResourceName. However, we could
 //! also use one of the defined constructor functions.
 //!
 //! ```rust
-//! use aws_arn::{Arn, ResourceIdentifier};
+//! use aws_arn::{ResourceName, ResourceIdentifier};
 //! use aws_arn::Service;
 //! use std::str::FromStr;
 //!
-//! let arn = Arn::aws(
+//! let arn = ResourceName::aws(
 //!     Service::S3,
 //!     ResourceIdentifier::from_str("mythings/thing-1").unwrap()
 //! );
 //! ```
 //!
-//! Alternatively, using `FromStr,` you can parse a Arn value directly from a
+//! Alternatively, using `FromStr,` you can parse a ResourceName value directly from a
 //! `String` or `&str`.
 //!
 //! ```rust
-//! use aws_arn::Arn;
+//! use aws_arn::ResourceName;
 //! use std::str::FromStr;
 //!
-//! let arn: Arn = "arn:aws:s3:::mythings/thing-1"
+//! let arn: ResourceName = "arn:aws:s3:::mythings/thing-1"
 //!     .parse()
-//!     .expect("didn't look like an Arn");
+//!     .expect("didn't look like an ResourceName");
 //! ```
 //!
 //! For more, see the AWS documentation for [Amazon Resource Name
-//! (Arn)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) documentation.
+//! (ResourceName)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) documentation.
 //!
 //! # Features
 //! * `serde`: enables (de)serialization using [`serde`](). This feature is enabled by default.
@@ -93,7 +93,7 @@ pub use types::{
 };
 use types::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 
-/// Amazon Resource Names (Arns) uniquely identify AWS resources. We require an Arn when you
+/// Amazon Resource Names (Arns) uniquely identify AWS resources. We require an ResourceName when you
 /// need to specify a resource unambiguously across all of AWS, such as in IAM policies,
 /// Amazon Relational Database Service (Amazon RDS) tags, and API calls.
 ///
@@ -106,13 +106,13 @@ use types::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 /// arn:partition:service:region:account-id:resource-type:resource-id
 /// ```
 ///
-/// From [Arn Format](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arns-syntax)
+/// From [ResourceName Format](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arns-syntax)
 ///
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 #[cfg_attr(feature = "builders", derive(bon::Builder))]
-pub struct Arn {
+pub struct ResourceName {
     /// The partition that the resource is in. For standard AWS Regions, the partition is` aws`.
     /// If you have resources in other partitions, the partition is `aws-partitionname`. For
     /// example, the partition for resources in the China partition is `aws-cn`.
@@ -134,7 +134,7 @@ pub struct Arn {
     #[cfg(feature = "builders")]
     #[builder(into, name = "in_account")]
     pub account_id: Option<AccountIdentifier>,
-    /// The content of this part of the Arn varies by service. A resource identifier can
+    /// The content of this part of the ResourceName varies by service. A resource identifier can
     /// be the name or ID of the resource (for example, `user/Bob` or
     /// `instance/i-1234567890abcdef0`) or a resource path. For example, some resource
     /// identifiers include a parent resource
@@ -145,7 +145,7 @@ pub struct Arn {
     pub resource: ResourceIdentifier,
 }
 
-impl Display for Arn {
+impl Display for ResourceName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let region = self
             .region
@@ -164,7 +164,7 @@ impl Display for Arn {
     }
 }
 
-impl FromStr for Arn {
+impl FromStr for ResourceName {
     type Err = ArnError;
 
     ///
@@ -192,7 +192,7 @@ impl FromStr for Arn {
         };
         let resource = ResourceIdentifier::from_str(parts[5])?;
 
-        Ok(Arn {
+        Ok(ResourceName {
             account_id,
             partition,
             region,
@@ -202,9 +202,9 @@ impl FromStr for Arn {
     }
 }
 
-impl From<AccountIdentifier> for Arn {
+impl From<AccountIdentifier> for ResourceName {
     fn from(account: AccountIdentifier) -> Self {
-        Arn {
+        ResourceName {
             account_id: Some(account),
             partition: Partition::Aws,
             region: None,
@@ -214,8 +214,8 @@ impl From<AccountIdentifier> for Arn {
     }
 }
 
-impl Arn {
-    /// Construct a minimal `Arn` value with simply a service and resource.
+impl ResourceName {
+    /// Construct a minimal `ResourceName` value with simply a service and resource.
     pub fn new(service: Service, resource: ResourceIdentifier) -> Self {
         Self {
             partition: Partition::Aws,
@@ -226,7 +226,7 @@ impl Arn {
         }
     }
 
-    /// Construct a minimal `Arn` value with simply a service and resource in the `aws` partition.
+    /// Construct a minimal `ResourceName` value with simply a service and resource in the `aws` partition.
     pub fn aws(service: Service, resource: ResourceIdentifier) -> Self {
         Self {
             partition: Partition::Aws,
