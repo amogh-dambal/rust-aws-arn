@@ -1,146 +1,92 @@
-/*!
-* Provides types, builders, and other helpers to manipulate AWS [Amazon
-* Resource Name
-* (ResourceName)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
-* strings.
-*
-* The ResourceName is a key component of all AWS service APIs and yet nearly
-* all client toolkits treat it simply as a string. While this may be a
-* reasonable and expedient decision, it seems there might be a need to not
-* only ensure correctness of ResourceNames with validators but also
-* constructors that allow making these strings correclt in the first place.
-*
-* # ResourceName Types
-*
-* This crate provides a number of levels of ResourceName manipulation, the
-* first is the direct construction of an ResourceName type using the core
-* `ResourceName`, `Identifier`, `AccountIdentifier`, and `ResourceIdentifier`
-* types.
-*
-* ```rust
-* use aws_arn::{ResourceName, ResourceIdentifier};
-* use aws_arn::known::{Partition, Service};
-* use std::str::FromStr;
-*
-* let arn = ResourceName {
-*     partition: Some(Partition::default().into()),
-*     service: Service::S3.into(),
-*     region: None,
-*     account_id: None,
-*     resource: ResourceIdentifier::from_str("mythings/thing-1").unwrap()
-* };
-* ```
-*
-* In the example above, as we are defining a minimal ResourceName we could use one of the defined constructor
-* functions.
-*
-* ```rust
-* use aws_arn::{ResourceName, ResourceIdentifier};
-* use aws_arn::known::Service;
-* use std::str::FromStr;
-*
-* let arn = ResourceName::aws(
-*     Service::S3.into(),
-*     ResourceIdentifier::from_str("mythings/thing-1").unwrap()
-* );
-* ```
-*
-* Alternatively, using `FromStr,` you can parse an existing ResourceName string into an ResourceName value.
-*
-* ```rust
-* use aws_arn::ResourceName;
-* use std::str::FromStr;
-*
-* let arn: ResourceName = "arn:aws:s3:::mythings/thing-1"
-*     .parse()
-*     .expect("didn't look like an ResourceName");
-* ```
-*
-* Another approach is to use a more readable *builder* which also allows you to ignore those fields
-* in the ResourceName you don't always need and uses a more fluent style of ResourceName construction.
-*
-* ```rust
-* use aws_arn::builder::{ArnBuilder, ResourceBuilder};
-* use aws_arn::known::{Partition, Service};
-* use aws_arn::{ResourceName, Identifier, IdentifierLike};
-* use std::str::FromStr;
-*
-* let arn: ResourceName = ArnBuilder::service_id(Service::S3.into())
-*     .resource(ResourceBuilder::named(Identifier::from_str("mythings").unwrap())
-*         .resource_name(Identifier::new_unchecked("my-layer"))
-*         .build_resource_path())
-*     .in_partition_id(Partition::Aws.into())
-*     .into();
-* ```
-*
-* Finally, it is possible to use resource-type specific functions that allow an even more direct and
-* simple construction (module `aws_arn::builder::{service}` - *service builder functions*, although
-* at this time there are few supported services.
-*
-* ```rust
-* use aws_arn::builder::s3;
-* use aws_arn::Identifier;
-* use std::str::FromStr;
-*
-* let arn = s3::object(
-*     Identifier::from_str("mythings").unwrap(),
-*     Identifier::from_str("thing-1").unwrap(),
-* );
-* ```
-*
-* For more, see the AWS documentation for [Amazon Resource Name
-* (ResourceName)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) documentation.
-*
-* # Optional Features
-*
-* This crate has attempted to be as lean as possible, with a really minimal set of dependencies,
-* we have include the following capabilities as optional features.
-*
-* * `builders` adds the builder module. This feature is enabled by default, it also requires the
-*   `known` feature.
-* * `known` adds a module containing enums for partitions, regions, and services.
-*   This feature is enabled by default.
-* * `serde_support` adds derived `Serialize` and `Deserialize` implementations for the `ResourceName` and
-*   `Resource` types. This feature is enabled by default.
-*
-*/
-
-// ------------------------------------------------------------------------------------------------
-// Preamble
-// ------------------------------------------------------------------------------------------------
+//! Provides structured types, validation + correctness, builders, and other utilities
+//! to manipulate [ARNs](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)
+//! (Amazon Resource Names).
+//!
+//! The ARN is a key component of all AWS service APIs, yet nearly
+//! all client toolkits treat it as a string. While this may be a
+//! reasonable and expedient decision, there is a need to ensure validity and correctness
+//! of AWS ARN
+//! AWS ARNs for it seems there might be a need to not
+//! only ensure correctness of ResourceNames with validators but also
+//! constructors that allow making these strings correclt in the first place.
+//!
+//! # `Arn` types
+//! This crate provides multiple interfaces to manipulate `Arn`s.
+//! The first is the direct construction of an `Arn` using the core types:
+//! [`Arn`], [`AccountIdentifier`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
+//!
+//! ```rust
+//! use aws_arn::{ResourceName, ResourceIdentifier};
+//! use aws_arn::types::{Partition, Region, Service};
+//! use std::str::FromStr;
+//!
+//! let arn = ResourceName {
+//!     partition: Partition::default(),
+//!     service: Service::S3,
+//!     region: None,
+//!     account_id: None,
+//!     resource: ResourceIdentifier::from_str("my-s3-bucket-name").unwrap(),
+//! };
+//! ```
+//!
+//! In the example above, as we are defining a minimal ResourceName. However, we could
+//! also use one of the defined constructor functions.
+//!
+//! ```rust
+//! use aws_arn::{ResourceName, ResourceIdentifier};
+//! use aws_arn::types::Service;
+//! use std::str::FromStr;
+//!
+//! let arn = ResourceName::aws(
+//!     Service::S3,
+//!     ResourceIdentifier::from_str("mythings/thing-1").unwrap()
+//! );
+//! ```
+//!
+//! Alternatively, using `FromStr,` you can parse a ResourceName value directly from a
+//! `String` or `&str`.
+//!
+//! ```rust
+//! use aws_arn::ResourceName;
+//! use std::str::FromStr;
+//!
+//! let arn: ResourceName = "arn:aws:s3:::mythings/thing-1"
+//!     .parse()
+//!     .expect("didn't look like an ResourceName");
+//! ```
+//!
+//! For more, see the AWS documentation for [Amazon Resource Name
+//! (ResourceName)](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) documentation.
+//!
+//! # Features
+//! * `serde`: enables (de)serialization using [`serde`](). This feature is enabled by default.
+//!/
 
 #![warn(
-    // ---------- Stylistic
     future_incompatible,
     nonstandard_style,
     rust_2018_idioms,
     trivial_casts,
     trivial_numeric_casts,
-    // ---------- Public
     missing_debug_implementations,
     missing_docs,
     unreachable_pub,
-    // ---------- Unsafe
     unsafe_code,
-    // ---------- Unused
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
-    unused_results,
+    unused_results
 )]
 
-use lazy_static::lazy_static;
 use regex::{Captures, Regex};
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::Deref;
 use std::str::FromStr;
-
-// ------------------------------------------------------------------------------------------------
-// Public Types
-// ------------------------------------------------------------------------------------------------
+use std::sync::LazyLock;
+use types::{Partition, Region, Service};
 
 /// This trait is implemented by the `ResourceName` component types. It
 /// represents a string-based identifier that is generally constructed using
@@ -189,7 +135,7 @@ where
 /// of an ResourceName. These are ASCII only, may not include control characters, spaces, '/', or ':'.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Identifier(String);
 
 ///
@@ -197,7 +143,7 @@ pub struct Identifier(String);
 /// of an ResourceName. These are ASCII digits only and a fixed length of 12 characters.
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct AccountIdentifier(String);
 
 ///
@@ -217,7 +163,7 @@ pub struct AccountIdentifier(String);
 /// > *In some circumstances, paths can include a wildcard character, namely an asterisk ('*').*
 ///
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct ResourceIdentifier(String);
 
 ///
@@ -238,24 +184,20 @@ pub struct ResourceIdentifier(String);
 ///
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct ResourceName {
     /// The partition that the resource is in. For standard AWS Regions, the partition is` aws`.
     /// If you have resources in other partitions, the partition is `aws-partitionname`. For
-    /// example, the partition for resources in the China partition is `aws-cn`. The module
-    /// `known::partition` provides common values as constants (if the `known` feature is
-    /// enabled).
-    pub partition: Option<Identifier>,
-    /// The service namespace that identifies the AWS. The module `known::service` provides
-    //  common values as constants (if the `known` feature is enabled).
-    pub service: Identifier,
-    /// The Region that the resource resides in. The ResourceNames for some resources do not require
-    /// a Region, so this component might be omitted. The module `known::region` provides
-    /// common values as constants (if the `known` feature is enabled).
-    pub region: Option<Identifier>,
+    /// example, the partition for resources in the China partition is `aws-cn`.
+    pub partition: Partition,
+    /// The service namespace that identifies the AWS service.
+    pub service: Service,
+    /// The AWS region that the resource resides in. Some resources - like S3 buckets - are considered
+    /// "global", and thus the ARN does not require a region.
+    pub region: Option<Region>,
     /// The ID of the AWS account that owns the resource, without the hyphens. For example,
-    /// `123456789012`. The ResourceNames for some resources don't require an account number, so this
-    /// component may be omitted.
+    /// `123456789012`. Some resources, like S3 buckets, have ARNs that do not include the AWS
+    /// account ID.
     pub account_id: Option<AccountIdentifier>,
     /// The content of this part of the ResourceName varies by service. A resource identifier can
     /// be the name or ID of the resource (for example, `user/Bob` or
@@ -265,10 +207,6 @@ pub struct ResourceName {
     /// version (`resource-type:resource-name:qualifier`).
     pub resource: ResourceIdentifier,
 }
-
-// ------------------------------------------------------------------------------------------------
-// Implementations
-// ------------------------------------------------------------------------------------------------
 
 const ARN_PREFIX: &str = "arn";
 
@@ -285,14 +223,8 @@ const CHAR_WILD_ANY: char = '*';
 
 const REQUIRED_COMPONENT_COUNT: usize = 6;
 
-const PARTITION_AWS_PREFIX: &str = "aws";
-const PARTITION_AWS_OTHER_PREFIX: &str = "aws-";
-
-lazy_static! {
-    static ref REGEX_VARIABLE: Regex = Regex::new(r"\$\{([^$}]+)\}").unwrap();
-}
-
-// ------------------------------------------------------------------------------------------------
+static REGEX_VARIABLE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\$\{([^$}]+)\}").expect("failed to initialize regex"));
 
 impl Display for Identifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -397,8 +329,6 @@ impl IdentifierLike for AccountIdentifier {
                 && s.chars().any(|c| c == CHAR_WILD_ONE || c == CHAR_WILD_ANY))
     }
 }
-
-// ------------------------------------------------------------------------------------------------
 
 impl Display for ResourceIdentifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -547,31 +477,21 @@ impl ResourceIdentifier {
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-
 impl Display for ResourceName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let region = self
+            .region
+            .clone()
+            .map_or(String::from(""), |val| val.to_string());
+        let account_id = self
+            .account_id
+            .clone()
+            .map_or(String::from(""), |val| val.to_string());
+
         write!(
             f,
-            "{}",
-            vec![
-                ARN_PREFIX.to_string(),
-                self.partition
-                    .as_ref()
-                    .unwrap_or(&known::Partition::default().into())
-                    .to_string(),
-                self.service.to_string(),
-                self.region
-                    .as_ref()
-                    .unwrap_or(&Identifier::default())
-                    .to_string(),
-                self.account_id
-                    .as_ref()
-                    .unwrap_or(&AccountIdentifier::default())
-                    .to_string(),
-                self.resource.to_string()
-            ]
-            .join(&PART_SEPARATOR.to_string())
+            "{}:{}:{}:{}:{}:{}",
+            ARN_PREFIX, self.partition, self.service, region, account_id, self.resource,
         )
     }
 }
@@ -585,49 +505,40 @@ impl FromStr for ResourceName {
     /// * `arn:partition:service:region:account-id: | resource part |`
     ///
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parts: Vec<&str> = s.split(PART_SEPARATOR).collect();
+        let parts: Vec<&str> = s.splitn(REQUIRED_COMPONENT_COUNT, PART_SEPARATOR).collect();
         if parts.len() < REQUIRED_COMPONENT_COUNT {
-            Err(Error::TooFewComponents)
+            return Err(Error::TooFewComponents);
         } else if parts[0] != ARN_PREFIX {
-            Err(Error::MissingPrefix)
-        } else {
-            let new_arn = ResourceName {
-                partition: if parts[1].is_empty() {
-                    None
-                } else if parts[1] == PARTITION_AWS_PREFIX
-                    || parts[1].starts_with(PARTITION_AWS_OTHER_PREFIX)
-                {
-                    Some(Identifier::from_str(parts[1])?)
-                } else {
-                    return Err(Error::InvalidPartition);
-                },
-                service: Identifier::from_str(parts[2])?,
-                region: if parts[3].is_empty() {
-                    None
-                } else {
-                    Some(Identifier::from_str(parts[3])?)
-                },
-                account_id: if parts[4].is_empty() {
-                    None
-                } else {
-                    Some(AccountIdentifier::from_str(parts[4])?)
-                },
-                resource: {
-                    let resource_parts: Vec<&str> = parts.drain(5..).collect();
-                    ResourceIdentifier::from_str(&resource_parts.join(&PART_SEPARATOR.to_string()))?
-                },
-            };
-
-            Ok(new_arn)
+            return Err(Error::MissingPrefix);
         }
+
+        let partition = Partition::from_str(parts[1])?;
+        let service = Service::from_str(parts[2])?;
+        let region = match parts[3] {
+            "" => None,
+            region => Some(Region::from_str(region)?),
+        };
+        let account_id = match parts[4] {
+            "" => None,
+            account_id => Some(AccountIdentifier::from_str(account_id)?),
+        };
+        let resource = ResourceIdentifier::from_str(parts[5])?;
+
+        Ok(ResourceName {
+            account_id,
+            partition,
+            region,
+            service,
+            resource,
+        })
     }
 }
 
 impl ResourceName {
     /// Construct a minimal `ResourceName` value with simply a service and resource.
-    pub fn new(service: Identifier, resource: ResourceIdentifier) -> Self {
+    pub fn new(service: Service, resource: ResourceIdentifier) -> Self {
         Self {
-            partition: None,
+            partition: Partition::Aws,
             service,
             region: None,
             account_id: None,
@@ -636,9 +547,9 @@ impl ResourceName {
     }
 
     /// Construct a minimal `ResourceName` value with simply a service and resource in the `aws` partition.
-    pub fn aws(service: Identifier, resource: ResourceIdentifier) -> Self {
+    pub fn aws(service: Service, resource: ResourceIdentifier) -> Self {
         Self {
-            partition: Some(known::Partition::default().into()),
+            partition: Partition::Aws,
             service,
             region: None,
             account_id: None,
@@ -666,22 +577,13 @@ impl ResourceName {
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-// External Doc Tests
-// ------------------------------------------------------------------------------------------------
+// #[cfg(doctest)]
+// doc_comment::doctest!("../README.md");
 
-#[cfg(doctest)]
-doc_comment::doctest!("../README.md");
-
-// ------------------------------------------------------------------------------------------------
-// Modules
-// ------------------------------------------------------------------------------------------------
+pub mod types;
 
 #[cfg(feature = "builders")]
 pub mod builder;
-
-#[cfg(feature = "known")]
-pub mod known;
 
 #[doc(hidden)]
 mod error;

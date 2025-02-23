@@ -6,8 +6,8 @@ These resource definitions ae take from the AWS
 */
 
 use crate::builder::ArnBuilder;
-use crate::known::Partition;
-use crate::known::Service::S3;
+use crate::types::Partition;
+use crate::types::Service::S3;
 use crate::{AccountIdentifier, Identifier, ResourceIdentifier, ResourceName};
 
 // ------------------------------------------------------------------------------------------------

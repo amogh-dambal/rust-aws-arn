@@ -108,7 +108,7 @@ we have include the following capabilities as optional features.
   `known` feature.
 * `known` adds a module containing enums for partitions, regions, and services.
   This feature is enabled by default.
-* `serde_support` adds derived `Serialize` and `Deserialize` implementations for the `ARN` and
+* `serde` adds derived `Serialize` and `Deserialize` implementations for the `ARN` and
   `Resource` types. This feature is enabled by default.
 
 ## Changes

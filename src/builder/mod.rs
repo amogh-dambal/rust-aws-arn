@@ -1,55 +1,34 @@
-/*!
-* Provides a more natural builder interface for constructing ResourceNames.
-*
-* The builder pattern allows for a more readable construction of ResourceNames, and in this case we
-* provide a number of *verb* prefixes on *noun* constructors, so we have `in_region` as well as
-* `and_region` which is more readable if it is preceded by `in_partition`. For the account id
-* field there is `in_account`, `and_account`, `any_account`, and `owned_by`; all of these
-* accomplish the same goal but allow for a choice that makes code easir to understand.
-*
-* # Resource-Specific Constructor Functions
-*
-* For the service-specific submodules (`iam`, `lambda`, `s3`, etc.) the functions are simply named
-* for the noun that represents the resource type as described in the AWS documentation. As the
-* partition in commonly left to default to "aws" there are also a set of `{noun}_in()` functions
-* that take a partition, and corresponding `{noun}()` functions which do not.
-*
-* In some cases where an ResourceName may be dependent on another, for example an S3 object ResourceName might be
-* constructed from an existing bucket ResourceName, additional `{noun}_from(other,...)` functions will
-* be provided.
-*
-* Note that the final `build()` function will call `validate()`, and so it is possible to call
-* intermediate functions with bad data which is only caught at build time.
-*
-* # Example
-*
-* The following shows the construction of an AWS versioned layer ResourceName.
-*
-* ```rust
-* use aws_arn::builder::{ArnBuilder, ResourceBuilder};
-* use aws_arn::{
-*     AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier, ResourceName
-* };
-* use aws_arn::known::{Region, Service};
-* use std::str::FromStr;
-*
-* let arn: ResourceName = ArnBuilder::service_id(Service::Lambda.into())
-*     .resource(
-*         ResourceBuilder::typed(Identifier::new_unchecked("layer"))
-*             .resource_name(Identifier::new_unchecked("my-layer"))
-*             .version(3)
-*             .build_qualified_id(),
-*     )
-*     .in_region_id(Region::UsEast2.into())
-*     .owned_by(AccountIdentifier::from_str("123456789012").unwrap())
-*     .into();
-* println!("ResourceName: '{}'", arn);
-* ```
-*
-* This should print `ResourceName: 'arn:aws:lambda:us-east-2:123456789012:layer:my-layer:3'`.
-*/
+//!
+//! Provides a more natural builder interface for constructing ResourceNames.
+//!
+//! The builder pattern allows for a more readable construction of ResourceNames, and in this case we
+//! provide a number of *verb* prefixes on *noun* constructors, so we have `in_region` as well as
+//! `and_region` which is more readable if it is preceded by `in_partition`. For the account id
+//! field there is `in_account`, `and_account`, `any_account`, and `owned_by`; all of these
+//! accomplish the same goal but allow for a choice that makes code easir to understand.
+//!
+//! # Resource-Specific Constructor Functions
+//!
+//! For the service-specific submodules (`iam`, `lambda`, `s3`, etc.) the functions are simply named
+//! for the noun that represents the resource type as described in the AWS documentation. As the
+//! partition in commonly left to default to "aws" there are also a set of `{noun}_in()` functions
+//! that take a partition, and corresponding `{noun}()` functions which do not.
+//!
+//! In some cases where an ResourceName may be dependent on another, for example an S3 object ResourceName might be
+//! constructed from an existing bucket ResourceName, additional `{noun}_from(other,...)` functions will
+//! be provided.
+//!
+//! Note that the final `build()` function will call `validate()`, and so it is possible to call
+//! intermediate functions with bad data which is only caught at build time.
+//!
+//! # Example
+//!
+//! The following shows the construction of an AWS versioned layer ResourceName.
+//!
+//!
 
 use crate::known::{Partition, Region, Service};
+use crate::types::Partition;
 use crate::{AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier, ResourceName};
 
 // ------------------------------------------------------------------------------------------------
@@ -98,10 +77,10 @@ impl ArnBuilder {
     }
 
     /// Construct an ResourceName for the specified `service`.
-    pub fn service_id(service: Identifier) -> Self {
+    pub fn service_id(service: Service) -> Self {
         Self {
             arn: ResourceName {
-                partition: None,
+                partition: Partition::Aws,
                 service,
                 region: None,
                 account_id: None,
@@ -111,36 +90,20 @@ impl ArnBuilder {
     }
 
     /// Set a specific `partition` for this ResourceName.
-    pub fn in_partition(&mut self, partition: Partition) -> &mut Self {
-        self.in_partition_id(partition.into())
-    }
-
-    /// Set a specific `partition` for this ResourceName.
-    pub fn in_partition_id(&mut self, partition: Identifier) -> &mut Self {
-        self.arn.partition = Some(partition);
+    pub fn in_partition<P: Into<Partition>>(&mut self, partition: P) -> &mut Self {
+        self.arn.partition = partition.into();
         self
     }
 
     /// Set a specific `partition` for this ResourceName.
     pub fn in_default_partition(&mut self) -> &mut Self {
-        self.arn.partition = Some(Partition::default().into());
-        self
-    }
-
-    /// Set a specific `partition` for this ResourceName.
-    pub fn in_any_partition(&mut self) -> &mut Self {
-        self.arn.partition = None;
+        self.arn.partition = Partition::default();
         self
     }
 
     /// Set a specific `region` for this ResourceName.
-    pub fn in_region(&mut self, region: Region) -> &mut Self {
-        self.in_region_id(region.into())
-    }
-
-    /// Set a specific `region` for this ResourceName.
-    pub fn in_region_id(&mut self, region: Identifier) -> &mut Self {
-        self.arn.region = Some(region);
+    pub fn in_region<R: Into<Region>>(&mut self, region: R) -> &mut Self {
+        self.arn.region = region.into();
         self
     }
 
