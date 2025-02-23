@@ -23,8 +23,7 @@
 //! # Example
 //!
 //! The following shows the construction of an AWS versioned layer Arn.
-//!
-//!
+//! TODO: Update the documentation
 
 use crate::{
     arn_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
@@ -32,35 +31,42 @@ use crate::{
 };
 
 impl<S: State> ArnBuilder<S> {
-    fn and_region(self, region: impl Into<Region>) -> ArnBuilder<SetInRegion<S>>
+    /// Specifies the AWS region where the resource described by the ARN being built
+    /// is located.
+    pub fn and_region(self, region: impl Into<Region>) -> ArnBuilder<SetInRegion<S>>
     where
         S::InRegion: IsUnset,
     {
         self.in_region(region)
     }
 
-    fn in_any_region(self) -> ArnBuilder<SetInRegion<S>>
+    /// Used for ARNs that describe resources that have no associated region, e.g.
+    /// S3 buckets or IAM roles.
+    pub fn in_any_region(self) -> ArnBuilder<SetInRegion<S>>
     where
         S::InRegion: IsUnset,
     {
         self.maybe_in_region(None::<Region>)
     }
 
-    fn and_account(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    /// Specifies the AWS account that owns the resource for which we are constructing an ARN.
+    pub fn and_account(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {
         self.in_account(account)
     }
 
-    fn owned_by(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
+    /// A more readable alias for `and_account`
+    pub fn owned_by(self, account: impl Into<AccountIdentifier>) -> ArnBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {
         self.in_account(account)
     }
 
-    fn is(self, resource: impl Into<ResourceIdentifier>) -> ArnBuilder<SetResource<S>>
+    /// Specifies the AWS resource being described by the AWS ARN.
+    pub fn is(self, resource: impl Into<ResourceIdentifier>) -> ArnBuilder<SetResource<S>>
     where
         S::Resource: IsUnset,
     {
