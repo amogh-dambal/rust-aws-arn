@@ -8,7 +8,7 @@ use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::LazyLock;
 
-use crate::Error;
+use crate::{ArnError, ArnResult};
 
 pub(crate) const ARN_PREFIX: &str = "arn";
 
@@ -111,13 +111,13 @@ impl Display for Identifier {
 }
 
 impl FromStr for Identifier {
-    type Err = Error;
+    type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if Self::is_valid(s) {
             Ok(Self(s.to_string()))
         } else {
-            Err(Error::InvalidIdentifier(s.to_string()))
+            Err(ArnError::InvalidIdentifier(s.to_string()))
         }
     }
 }
@@ -162,13 +162,13 @@ impl Display for AccountIdentifier {
 }
 
 impl FromStr for AccountIdentifier {
-    type Err = Error;
+    type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if Self::is_valid(s) {
             Ok(Self(s.to_string()))
         } else {
-            Err(Error::InvalidAccountId(s.to_string()))
+            Err(ArnError::InvalidAccountId(s.to_string()))
         }
     }
 }
@@ -209,13 +209,13 @@ impl Display for ResourceIdentifier {
 }
 
 impl FromStr for ResourceIdentifier {
-    type Err = Error;
+    type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if Self::is_valid(s) {
             Ok(Self(s.to_string()))
         } else {
-            Err(Error::InvalidResource(s.to_string()))
+            Err(ArnError::InvalidResource(s.to_string()))
         }
     }
 }
@@ -334,7 +334,7 @@ impl ResourceIdentifier {
     /// Replace any variables in the string with values from the context,
     /// returning a new value if the replacements result in a legal identifier
     /// string. The
-    pub fn replace_variables<V>(&self, context: &HashMap<String, V>) -> Result<Self, Error>
+    pub fn replace_variables<V>(&self, context: &HashMap<String, V>) -> ArnResult<Self>
     where
         V: Clone + Into<String>,
     {

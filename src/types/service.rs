@@ -2,7 +2,7 @@
 
 use std::{fmt::Display, str::FromStr};
 
-use crate::Error;
+use crate::ArnError;
 
 /// A list of known service identifiers.
 #[derive(
@@ -1069,7 +1069,7 @@ impl Display for Service {
 }
 
 impl FromStr for Service {
-    type Err = Error;
+    type Err = ArnError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "accessanalyzer" => Ok(Self::AccessAnalyzer),
@@ -1334,11 +1334,11 @@ impl FromStr for Service {
             "workmailmessageflow" => Ok(Self::WorkMailMessageFlow),
             "workspaces" => Ok(Self::WorkSpaces),
             "xray" => Ok(Self::XRay),
-            _ => Err(Error::InvalidService),
+            s => Err(ArnError::InvalidService(s.to_string())),
         }
     }
 }
 
-fn convert_service_parse_err(_: &str) -> Error {
-    Error::InvalidService
+fn convert_service_parse_err(s: &str) -> ArnError {
+    ArnError::InvalidService(s.to_string())
 }

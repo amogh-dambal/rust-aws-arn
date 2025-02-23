@@ -1,6 +1,6 @@
 //! AWS partition information.
 
-use crate::Error;
+use crate::ArnError;
 
 /// A list of known partition identifiers from
 /// [docs.aws](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html).
@@ -21,7 +21,7 @@ use crate::Error;
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[strum(
     parse_err_fn = convert_partition_parse_err,
-    parse_err_ty = Error,
+    parse_err_ty = ArnError,
 )]
 pub enum Partition {
     /// Corresponds to the partition "aws": AWS region
@@ -41,6 +41,6 @@ pub enum Partition {
     AwsUsGov,
 }
 
-fn convert_partition_parse_err(_: &str) -> Error {
-    Error::InvalidPartition
+fn convert_partition_parse_err(p: &str) -> ArnError {
+    ArnError::InvalidPartition(p.to_string())
 }

@@ -1,6 +1,6 @@
 //! AWS regions
 
-use crate::Error;
+use crate::ArnError;
 
 /// A list of known region identifiers from
 /// [docs.aws](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html).
@@ -20,7 +20,7 @@ use crate::Error;
 #[strum(
     serialize_all = "kebab-case",
     parse_err_fn = convert_region_parse_err,
-    parse_err_ty = Error,
+    parse_err_ty = ArnError,
     use_phf,
 )]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -164,6 +164,6 @@ pub enum Region {
     UsGovEast1,
 }
 
-fn convert_region_parse_err(_: &str) -> Error {
-    Error::InvalidRegion
+fn convert_region_parse_err(r: &str) -> ArnError {
+    ArnError::InvalidRegion(r.to_string())
 }

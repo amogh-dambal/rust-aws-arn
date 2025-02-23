@@ -152,7 +152,7 @@ impl Display for Arn {
 }
 
 impl FromStr for Arn {
-    type Err = Error;
+    type Err = ArnError;
 
     ///
     /// Format:
@@ -162,9 +162,9 @@ impl FromStr for Arn {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.splitn(REQUIRED_COMPONENT_COUNT, PART_SEPARATOR).collect();
         if parts.len() < REQUIRED_COMPONENT_COUNT {
-            return Err(Error::TooFewComponents);
+            return Err(ArnError::TooFewComponents(parts.len()));
         } else if parts[0] != ARN_PREFIX {
-            return Err(Error::MissingPrefix);
+            return Err(ArnError::MissingPrefix);
         }
 
         let partition = Partition::from_str(parts[1])?;
@@ -233,7 +233,7 @@ impl Arn {
     /// Replace any variables in the string with values from the context,
     /// returning a new value if the replacements result in a legal identifier
     /// string. The
-    pub fn replace_variables<V>(&self, context: &HashMap<String, V>) -> Result<Self, Error>
+    pub fn replace_variables<V>(&self, context: &HashMap<String, V>) -> ArnResult<Self>
     where
         V: Clone + Into<String>,
     {
@@ -252,4 +252,4 @@ pub mod builder;
 
 #[doc(hidden)]
 mod error;
-pub use error::Error;
+pub use error::{ArnError, ArnResult};
