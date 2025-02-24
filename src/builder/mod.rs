@@ -1,10 +1,10 @@
-//! Provides a more natural builder interface for constructing Arns.
+//! A natural fluent builder interface for constructing [`ResourceName`]s.
 //!
-//! The builder pattern allows for a more readable construction of Arns, and in this case we
-//! provide a number of *verb* prefixes on *noun* constructors, so we have `in_region` as well as
-//! `and_region` which is more readable if it is preceded by `in_partition`. For the account id
-//! field there is `in_account`, `and_account`, `any_account`, and `owned_by`; all of these
-//! accomplish the same goal but allow for a choice that makes code easir to understand.
+//! The builder pattern allows for a more readable construction of [`ResourceName`]s.
+//! We provide a number of *verb* prefixes on *noun* constructors, e.g. `in_region` as well as
+//! `and_region`, which is more readable if it is preceded by `in_partition`. For the account id
+//! field, there is `in_account`, `and_account`, `any_account`, and `owned_by`; all of these
+//! accomplish the same goal but allow for a choice that makes code easier to understand.
 //!
 //! # Resource-Specific Constructor Functions
 //!
@@ -23,7 +23,32 @@
 //! # Example
 //!
 //! The following shows the construction of an AWS versioned layer ResourceName.
-//! TODO: Update the documentation
+//! ```rust
+//! use aws_arn::builder::{ResourceNameBuilder, ResourceBuilder};
+//! use aws_arn::{
+//!     AccountIdentifier,
+//!     Identifier,
+//!     IdentifierLike,
+//!     ResourceIdentifier,
+//!     ResourceName,
+//!     Region,
+//!     Service
+//! };
+//! use std::str::FromStr;
+//!
+//! // 'arn:aws:lambda:us-east-2:123456789012:layer:my-layer:3'
+//! let arn: ResourceName = ResourceName::builder()
+//!     .service(Service::Lambda)
+//!     .resource(
+//!         ResourceBuilder::typed(Identifier::new_unchecked("layer"))
+//!             .resource_name(Identifier::new_unchecked("my-layer"))
+//!             .version(3)
+//!             .build_qualified_id(),
+//!     )
+//!     .in_region(Region::UsEast2)
+//!     .owned_by(AccountIdentifier::from_str("123456789012").unwrap())
+//!     .build();
+//! ```
 
 pub use crate::ResourceNameBuilder;
 use crate::{
