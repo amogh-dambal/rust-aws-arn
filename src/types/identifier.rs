@@ -152,15 +152,15 @@ static ACCOUNT_ID_REGEX: LazyLock<Regex> =
 /// of an ResourceName. These are ASCII digits only and a fixed length of 12 characters.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct AccountIdentifier(String);
+pub struct AccountId(String);
 
-impl Display for AccountIdentifier {
+impl Display for AccountId {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl FromStr for AccountIdentifier {
+impl FromStr for AccountId {
     type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -170,13 +170,13 @@ impl FromStr for AccountIdentifier {
     }
 }
 
-impl From<AccountIdentifier> for String {
-    fn from(v: AccountIdentifier) -> Self {
+impl From<AccountId> for String {
+    fn from(v: AccountId) -> Self {
         v.0
     }
 }
 
-impl Deref for AccountIdentifier {
+impl Deref for AccountId {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
@@ -184,7 +184,7 @@ impl Deref for AccountIdentifier {
     }
 }
 
-impl IdentifierLike for AccountIdentifier {
+impl IdentifierLike for AccountId {
     fn new_unchecked(s: &str) -> Self {
         Self(s.to_string())
     }

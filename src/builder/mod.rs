@@ -26,7 +26,7 @@
 //! ```rust
 //! use aws_arn::builder::{ResourceNameBuilder, ResourceBuilder};
 //! use aws_arn::{
-//!     AccountIdentifier,
+//!     AccountId,
 //!     Identifier,
 //!     IdentifierLike,
 //!     ResourceIdentifier,
@@ -46,14 +46,14 @@
 //!             .build_qualified_id(),
 //!     )
 //!     .in_region(Region::UsEast2)
-//!     .owned_by(AccountIdentifier::from_str("123456789012").unwrap())
+//!     .owned_by(AccountId::from_str("123456789012").unwrap())
 //!     .build();
 //! ```
 
 pub use crate::ResourceNameBuilder;
 use crate::{
     resource_name_builder::{IsUnset, SetInAccount, SetInRegion, SetResource, State},
-    AccountIdentifier, Identifier, IdentifierLike, Region, ResourceIdentifier,
+    AccountId, Identifier, IdentifierLike, Region, ResourceIdentifier,
 };
 
 impl<S: State> ResourceNameBuilder<S> {
@@ -76,10 +76,7 @@ impl<S: State> ResourceNameBuilder<S> {
     }
 
     /// Specifies the AWS account that owns the resource for which we are constructing an ARN.
-    pub fn and_account(
-        self,
-        account: impl Into<AccountIdentifier>,
-    ) -> ResourceNameBuilder<SetInAccount<S>>
+    pub fn and_account(self, account: impl Into<AccountId>) -> ResourceNameBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {
@@ -87,10 +84,7 @@ impl<S: State> ResourceNameBuilder<S> {
     }
 
     /// A more readable alias for `and_account`
-    pub fn owned_by(
-        self,
-        account: impl Into<AccountIdentifier>,
-    ) -> ResourceNameBuilder<SetInAccount<S>>
+    pub fn owned_by(self, account: impl Into<AccountId>) -> ResourceNameBuilder<SetInAccount<S>>
     where
         S::InAccount: IsUnset,
     {

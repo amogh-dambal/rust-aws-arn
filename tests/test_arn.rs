@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use aws_arn::{
-    AccountIdentifier, IdentifierLike, Partition, Region, ResourceIdentifier, ResourceName, Service,
+    AccountId, IdentifierLike, Partition, Region, ResourceIdentifier, ResourceName, Service,
 };
 
 fn parse_and_compare(test_arn: &str, expected: ResourceName) {
@@ -55,7 +55,7 @@ fn test_arn_from_valid_str() {
             partition: Partition::Aws,
             service: Service::S3,
             region: Some(Region::UsEast1),
-            account_id: Some(AccountIdentifier::new_unchecked("123456789012")),
+            account_id: Some(AccountId::new_unchecked("123456789012")),
             resource: ResourceIdentifier::new_unchecked("job/23476"),
         },
     );
@@ -73,7 +73,7 @@ fn test_github_issues_2() {
     assert_eq!(arn.region, Some(Region::UsWest2));
     assert_eq!(
         arn.account_id,
-        Some(AccountIdentifier::new_unchecked("123456789012"))
+        Some(AccountId::new_unchecked("123456789012"))
     );
     assert_eq!(
         arn.resource,

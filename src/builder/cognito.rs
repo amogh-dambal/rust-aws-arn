@@ -3,8 +3,8 @@
 //! For more information, check out the [AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazoncognitoidentity.html#amazoncognitoidentity-resources-for-iam-policies).
 
 use crate::{
-    AccountIdentifier, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier,
-    ResourceName, Service::CognitoIdentity,
+    AccountId, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier, ResourceName,
+    Service::CognitoIdentity,
 };
 
 ///
@@ -13,7 +13,7 @@ use crate::{
 pub fn identity_pool(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     identity_pool_id: Identifier,
 ) -> ResourceName {
     ResourceName::builder()

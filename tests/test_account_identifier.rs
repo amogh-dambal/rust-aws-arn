@@ -1,4 +1,4 @@
-use aws_arn::{AccountIdentifier, IdentifierLike};
+use aws_arn::{AccountId, IdentifierLike};
 use proptest::prelude::*;
 use rstest::rstest;
 use std::str::FromStr;
@@ -12,7 +12,7 @@ fn test_account_identifier_api(
     #[case] has_wildcards: bool,
     #[case] is_plain: bool,
 ) {
-    let account = AccountIdentifier::from_str(account_id);
+    let account = AccountId::from_str(account_id);
     assert!(account.is_ok());
     let account = account.unwrap();
     assert!(!account.is_empty());
@@ -25,7 +25,7 @@ fn test_account_identifier_api(
 #[case::standard("012345678912")]
 #[case::wildcard("*")]
 fn test_account_identifier_valid(#[case] val: &str) {
-    assert!(AccountIdentifier::is_valid(val))
+    assert!(AccountId::is_valid(val))
 }
 
 #[rstest]
@@ -40,18 +40,18 @@ fn test_account_identifier_valid(#[case] val: &str) {
 #[case::colon(":")]
 #[case::slash("/")]
 fn test_account_identifier_is_not_valid(#[case] val: &str) {
-    assert!(!AccountIdentifier::is_valid(val));
+    assert!(!AccountId::is_valid(val));
 }
 
 proptest! {
     #[test]
     fn proptest_account_identifier_char_doesnt_crash(s in "\\PC") {
-        let _ = AccountIdentifier::from_str(&s);
+        let _ = AccountId::from_str(&s);
     }
 
    #[test]
    fn proptest_account_identifier_valid_values(s in r"[0-9]{12}") {
        println!("valid_values {:?}", s);
-       assert!(AccountIdentifier::from_str(&s).is_ok());
+       assert!(AccountId::from_str(&s).is_ok());
    }
 }

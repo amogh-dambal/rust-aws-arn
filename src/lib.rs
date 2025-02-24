@@ -11,7 +11,7 @@
 //! # `ResourceName` types
 //! This crate provides multiple interfaces to manipulate `ResourceName`s.
 //! The first is the direct construction of an `ResourceName` using the core types:
-//! [`ResourceName`], [`AccountIdentifier`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
+//! [`ResourceName`], [`AccountId`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
 //!
 //! ```rust
 //! use aws_arn::{ResourceName, ResourceIdentifier};
@@ -88,7 +88,7 @@ use std::str::FromStr;
 
 mod types;
 pub use types::{
-    AccountIdentifier, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier, Service,
+    AccountId, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier, Service,
 };
 use types::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 
@@ -132,7 +132,7 @@ pub struct ResourceName {
     /// account ID.
     #[cfg(feature = "builders")]
     #[builder(into, name = "in_account")]
-    pub account_id: Option<AccountIdentifier>,
+    pub account_id: Option<AccountId>,
     /// The content of this part of the ResourceName varies by service. A resource identifier can
     /// be the name or ID of the resource (for example, `user/Bob` or
     /// `instance/i-1234567890abcdef0`) or a resource path. For example, some resource
@@ -187,7 +187,7 @@ impl FromStr for ResourceName {
         };
         let account_id = match parts[4] {
             "" => None,
-            account_id => Some(AccountIdentifier::from_str(account_id)?),
+            account_id => Some(AccountId::from_str(account_id)?),
         };
         let resource = ResourceIdentifier::from_str(parts[5])?;
 
@@ -201,8 +201,8 @@ impl FromStr for ResourceName {
     }
 }
 
-impl From<AccountIdentifier> for ResourceName {
-    fn from(account: AccountIdentifier) -> Self {
+impl From<AccountId> for ResourceName {
+    fn from(account: AccountId) -> Self {
         ResourceName {
             account_id: Some(account),
             partition: Partition::Aws,
