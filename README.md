@@ -22,7 +22,7 @@ the correctness of ARNs.
 
 This crate provides multiple interfaces to manipulate ARNs. The first
 is the direct construction of an ARN type using the core `ResourceName`,
-`Identifier`, `AccountIdentifier`, and `ResourceIdentifier` types.
+`Identifier`, `AccountId`, and `ResourceIdentifier` types.
 
 ```rust
 use aws_arn::{ResourceName, ResourceIdentifier};
@@ -112,7 +112,7 @@ experience that can be granularly controlled using `cargo` features.
 
 **Version 0.3.1**
 
-* Added unit tests for `AccountIdentifier`.
+* Added unit tests for `AccountId`.
 
 **Version 0.3.0**
 
@@ -124,7 +124,7 @@ experience that can be granularly controlled using `cargo` features.
 
 **Version 0.2.1**
 
-* Created a new `AccountIdentifier` type for the 12-digit value.
+* Created a new `AccountId` type for the 12-digit value.
 * `consts` feature renamed `known`.
 
 **Version 0.2.0**

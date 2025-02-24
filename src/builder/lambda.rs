@@ -3,8 +3,8 @@
 //! For more information, check out the [AWS documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/list_awslambda.html#awslambda-resources-for-iam-policies)
 
 use crate::{
-    AccountIdentifier, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier,
-    ResourceName, Service::Lambda,
+    AccountId, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier, ResourceName,
+    Service::Lambda,
 };
 
 ///
@@ -13,7 +13,7 @@ use crate::{
 pub fn function(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     function_name: Identifier,
 ) -> ResourceName {
     ResourceName::builder()
@@ -34,7 +34,7 @@ pub fn function(
 pub fn layer(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     layer_name: Identifier,
 ) -> ResourceName {
     ResourceName::builder()
@@ -55,7 +55,7 @@ pub fn layer(
 pub fn layer_version(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     layer_name: Identifier,
     layer_version: i32,
 ) -> ResourceName {
@@ -78,7 +78,7 @@ pub fn layer_version(
 pub fn event_source_mapping(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     mapping_uuid: Identifier,
 ) -> ResourceName {
     ResourceName::builder()

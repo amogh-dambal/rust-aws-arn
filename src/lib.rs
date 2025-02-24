@@ -11,7 +11,7 @@
 //! # `ResourceName` types
 //! This crate provides multiple interfaces to manipulate `ResourceName`s.
 //! The first is the direct construction of an `ResourceName` using the core types:
-//! [`ResourceName`], [`AccountIdentifier`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
+//! [`ResourceName`], [`AccountId`], [`Partition`], [`Service`], and [`ResourceIdentifier`].
 //!
 //! ```rust
 //! use aws_arn::{ResourceName, ResourceIdentifier};
@@ -88,7 +88,8 @@ use std::str::FromStr;
 
 mod types;
 pub use types::{
-    AccountIdentifier, Identifier, IdentifierLike, Partition, Region, ResourceIdentifier, Service,
+    AccountId, AccountIdentifier, Identifier, IdentifierLike, Partition, Region,
+    ResourceIdentifier, Service,
 };
 use types::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 
@@ -201,10 +202,10 @@ impl FromStr for ResourceName {
     }
 }
 
-impl From<AccountIdentifier> for ResourceName {
-    fn from(account: AccountIdentifier) -> Self {
+impl From<AccountId> for ResourceName {
+    fn from(account: AccountId) -> Self {
         ResourceName {
-            account_id: Some(account),
+            account_id: Some(AccountIdentifier::Account(account)),
             partition: Partition::Aws,
             region: None,
             resource: ResourceIdentifier::from_str("root").unwrap(),

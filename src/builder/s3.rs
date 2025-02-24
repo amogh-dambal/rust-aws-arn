@@ -4,7 +4,7 @@
 
 use crate::types::Partition;
 use crate::types::Service::S3;
-use crate::{AccountIdentifier, Identifier, Region, ResourceIdentifier, ResourceName};
+use crate::{AccountId, Identifier, Region, ResourceIdentifier, ResourceName};
 
 ///
 /// `arn:${Partition}:s3:::${BucketName}`
@@ -73,7 +73,7 @@ pub fn object_from(bucket: &ResourceName, object_name: Identifier) -> ResourceNa
 pub fn job_in(
     partition: Partition,
     region: Region,
-    account: AccountIdentifier,
+    account: AccountId,
     job_id: Identifier,
 ) -> ResourceName {
     ResourceName::builder()
@@ -88,6 +88,6 @@ pub fn job_in(
 ///
 /// `arn:aws:s3:${Region}:${Account}:job/${JobId}`
 ///
-pub fn job(region: Region, account: AccountIdentifier, job_id: Identifier) -> ResourceName {
+pub fn job(region: Region, account: AccountId, job_id: Identifier) -> ResourceName {
     job_in(Partition::default().into(), region, account, job_id)
 }

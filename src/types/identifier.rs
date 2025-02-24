@@ -77,25 +77,6 @@ where
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Identifier(String);
 
-/// A string value that is used to capture the resource component of an ResourceName. These are ASCII only,
-/// may not include control characters but unlike `Identifier` they may include spaces, '/', and ':'.
-///
-/// > *The content of this part of the ResourceName varies by service. A resource identifier can be the name
-/// > or ID of the resource (for example, `user/Bob` or `instance/i-1234567890abcdef0`) or a
-/// > resource path. For example, some resource identifiers include a parent resource
-/// > (`sub-resource-type/parent-resource/sub-resource`) or a qualifier such as a version
-/// > (`resource-type:resource-name:qualifier`).*
-///
-/// > *Some resource Arns can include a path. For example, in Amazon S3, the resource identifier
-/// > is an object name that can include slashes ('/') to form a path. Similarly, IAM user names
-/// > and group names can include paths.*
-///
-/// > *In some circumstances, paths can include a wildcard character, namely an asterisk ('*').*
-///
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct ResourceIdentifier(String);
-
 impl Display for Identifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
@@ -145,6 +126,54 @@ impl IdentifierLike for Identifier {
     }
 }
 
+/// Possible ways a [`ResourceName`] can represent the account identifier
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+pub enum AccountIdentifier {
+    /// Represents a 12-digit identifier for an AWS account ID.
+    ///
+    /// See <https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-identifiers.html#FindAccountId>
+    Account(AccountId),
+    /// A more generic "account" identifier for an AWS resource.
+    ///
+    /// This is typically used for AWS-managed resources e.g. managed IAM policies.
+    Service(Identifier),
+}
+
+impl Display for AccountIdentifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Self::Account(account_id) => write!(f, "{account_id}"),
+            Self::Service(service_id) => write!(f, "{service_id}"),
+        }
+    }
+}
+
+impl FromStr for AccountIdentifier {
+    type Err = ArnError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(account_id) = AccountId::from_str(s) {
+            Ok(Self::Account(account_id))
+        } else {
+            let service_id = Identifier::from_str(s)?;
+            Ok(Self::Service(service_id))
+        }
+    }
+}
+
+impl From<AccountId> for AccountIdentifier {
+    fn from(account_id: AccountId) -> Self {
+        Self::Account(account_id)
+    }
+}
+
+impl From<Identifier> for AccountIdentifier {
+    fn from(id: Identifier) -> Self {
+        Self::Service(id)
+    }
+}
+
 static ACCOUNT_ID_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^([0-9]{12}|\*)$").expect("failed to init account ID regex"));
 
@@ -152,15 +181,15 @@ static ACCOUNT_ID_REGEX: LazyLock<Regex> =
 /// of an ResourceName. These are ASCII digits only and a fixed length of 12 characters.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct AccountIdentifier(String);
+pub struct AccountId(String);
 
-impl Display for AccountIdentifier {
+impl Display for AccountId {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl FromStr for AccountIdentifier {
+impl FromStr for AccountId {
     type Err = ArnError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -170,13 +199,13 @@ impl FromStr for AccountIdentifier {
     }
 }
 
-impl From<AccountIdentifier> for String {
-    fn from(v: AccountIdentifier) -> Self {
+impl From<AccountId> for String {
+    fn from(v: AccountId) -> Self {
         v.0
     }
 }
 
-impl Deref for AccountIdentifier {
+impl Deref for AccountId {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
@@ -184,7 +213,7 @@ impl Deref for AccountIdentifier {
     }
 }
 
-impl IdentifierLike for AccountIdentifier {
+impl IdentifierLike for AccountId {
     fn new_unchecked(s: &str) -> Self {
         Self(s.to_string())
     }
@@ -193,6 +222,25 @@ impl IdentifierLike for AccountIdentifier {
         ACCOUNT_ID_REGEX.is_match(s)
     }
 }
+
+/// A string value that is used to capture the resource component of an ResourceName. These are ASCII only,
+/// may not include control characters but unlike `Identifier` they may include spaces, '/', and ':'.
+///
+/// > *The content of this part of the ResourceName varies by service. A resource identifier can be the name
+/// > or ID of the resource (for example, `user/Bob` or `instance/i-1234567890abcdef0`) or a
+/// > resource path. For example, some resource identifiers include a parent resource
+/// > (`sub-resource-type/parent-resource/sub-resource`) or a qualifier such as a version
+/// > (`resource-type:resource-name:qualifier`).*
+///
+/// > *Some resource Arns can include a path. For example, in Amazon S3, the resource identifier
+/// > is an object name that can include slashes ('/') to form a path. Similarly, IAM user names
+/// > and group names can include paths.*
+///
+/// > *In some circumstances, paths can include a wildcard character, namely an asterisk ('*').*
+///
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
+pub struct ResourceIdentifier(String);
 
 impl Display for ResourceIdentifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

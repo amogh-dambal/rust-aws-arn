@@ -5,14 +5,14 @@
 //! documentation on the AWS ARN for root AWS accounts.
 
 use crate::{
-    AccountIdentifier, Identifier, IdentifierLike, Partition, ResourceIdentifier, ResourceName,
+    AccountId, Identifier, IdentifierLike, Partition, ResourceIdentifier, ResourceName,
     Service::IdentityAccessManagement,
 };
 
 ///
 /// `arn:aws:iam::123456789012:root`
 ///
-pub fn root(account: AccountIdentifier) -> ResourceName {
+pub fn root(account: AccountId) -> ResourceName {
     ResourceName::builder()
         .service(IdentityAccessManagement)
         .owned_by(account)
@@ -23,11 +23,7 @@ pub fn root(account: AccountIdentifier) -> ResourceName {
 ///
 /// `arn:${Partition}:iam::${Account}:user/${UserNameWithPath}`
 ///
-pub fn user(
-    partition: Partition,
-    account: AccountIdentifier,
-    user_name: Identifier,
-) -> ResourceName {
+pub fn user(partition: Partition, account: AccountId, user_name: Identifier) -> ResourceName {
     ResourceName::builder()
         .service(IdentityAccessManagement)
         .in_partition(partition)
@@ -42,11 +38,7 @@ pub fn user(
 ///
 /// `arn:${Partition}:iam::${Account}:role/${RoleNameWithPath}`
 ///
-pub fn role(
-    partition: Partition,
-    account: AccountIdentifier,
-    role_name: Identifier,
-) -> ResourceName {
+pub fn role(partition: Partition, account: AccountId, role_name: Identifier) -> ResourceName {
     ResourceName::builder()
         .service(IdentityAccessManagement)
         .in_partition(partition)
@@ -61,11 +53,7 @@ pub fn role(
 ///
 /// `arn:${Partition}:iam::${Account}:group/${GroupNameWithPath}`
 ///
-pub fn group(
-    partition: Partition,
-    account: AccountIdentifier,
-    group_name: Identifier,
-) -> ResourceName {
+pub fn group(partition: Partition, account: AccountId, group_name: Identifier) -> ResourceName {
     ResourceName::builder()
         .service(IdentityAccessManagement)
         .in_partition(partition)
@@ -80,11 +68,7 @@ pub fn group(
 ///
 /// `arn:${Partition}:iam::${Account}:policy/${PolicyNameWithPath}`
 ///
-pub fn policy(
-    partition: Partition,
-    account: AccountIdentifier,
-    policy_name: Identifier,
-) -> ResourceName {
+pub fn policy(partition: Partition, account: AccountId, policy_name: Identifier) -> ResourceName {
     ResourceName::builder()
         .service(IdentityAccessManagement)
         .in_partition(partition)

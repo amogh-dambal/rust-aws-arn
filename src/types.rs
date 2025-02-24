@@ -4,7 +4,9 @@ mod partition;
 mod region;
 mod service;
 
-pub use identifier::{AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier};
+pub use identifier::{
+    AccountId, AccountIdentifier, Identifier, IdentifierLike, ResourceIdentifier,
+};
 pub(crate) use identifier::{ARN_PREFIX, PART_SEPARATOR, REQUIRED_COMPONENT_COUNT};
 pub use partition::Partition;
 pub use region::Region;

@@ -1,4 +1,4 @@
-use aws_arn::{AccountIdentifier, Identifier, Region, ResourceIdentifier, ResourceName, Service};
+use aws_arn::{AccountId, Identifier, Region, ResourceIdentifier, ResourceName, Service};
 use std::str::FromStr;
 
 #[test]
@@ -20,7 +20,7 @@ fn test_lambda_layer() {
             Identifier::from_str(&3.to_string()).unwrap(),
         ]))
         .in_region(Region::UsEast2)
-        .owned_by(AccountIdentifier::from_str("123456789012").unwrap())
+        .owned_by(AccountId::from_str("123456789012").unwrap())
         .build();
 
     assert_eq!(
