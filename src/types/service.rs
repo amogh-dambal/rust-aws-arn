@@ -768,6 +768,9 @@ pub enum Service {
     /// Corresponds to the service "translate"
     Translate,
 
+    /// Corresponds to the service "trustedadvisor"
+    TrustedAdvisor,
+
     /// Corresponds to the service "waf"
     WebApplicationFirewall,
 
@@ -1052,6 +1055,7 @@ impl Display for Service {
             Self::Transcribe => "transcribe",
             Self::Transfer => "transfer",
             Self::Translate => "translate",
+            Self::TrustedAdvisor => "trustedadvisor",
             Self::WebApplicationFirewall => "waf",
             Self::WebApplicationFirewallRegional => "waf-regional",
             Self::WebApplicationFirewallV2 => "wafv2",
@@ -1154,12 +1158,14 @@ impl FromStr for Service {
             "ecr-public" => Ok(Self::Ec2containerRegistryPublic),
             "ecs" => Ok(Self::Ec2ContainerService),
             "efs" => Ok(Self::ElasticFileSystem),
+            "elasticfilesystem" => Ok(Self::ElasticFileSystem),
             "eks" => Ok(Self::ElasticKubernetes),
             "elastic-inference" => Ok(Self::ElasticInference),
             "elasticache" => Ok(Self::Elasticache),
             "elasticbeanstalk" => Ok(Self::ElasticBeanstalk),
             "elastictranscoder" => Ok(Self::ElasticTranscoder),
             "elb" => Ok(Self::ElasticLoadBalancing),
+            "elasticloadbalancing" => Ok(Self::ElasticLoadBalancing),
             "elbv2" => Ok(Self::ElasticLoadBalancingV2),
             "emr" => Ok(Self::ElasticMapReduce),
             "emr-containers" => Ok(Self::ElasticMapReduceContainers),
@@ -1324,6 +1330,7 @@ impl FromStr for Service {
             "transcribe" => Ok(Self::Transcribe),
             "transfer" => Ok(Self::Transfer),
             "translate" => Ok(Self::Translate),
+            "trustedadvisor" => Ok(Self::TrustedAdvisor),
             "waf" => Ok(Self::WebApplicationFirewall),
             "waf-regional" => Ok(Self::WebApplicationFirewallRegional),
             "wafv2" => Ok(Self::WebApplicationFirewallV2),
