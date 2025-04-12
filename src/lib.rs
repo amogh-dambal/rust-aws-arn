@@ -244,7 +244,7 @@ impl ResourceName {
 
     /// Replace any variables in the string with values from the context,
     /// returning a new value if the replacements result in a legal identifier
-    /// string. The
+    /// string.
     pub fn replace_variables<V>(&self, context: &HashMap<String, V>) -> ArnResult<Self>
     where
         V: Clone + Into<String>,
