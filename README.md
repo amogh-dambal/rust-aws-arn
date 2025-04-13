@@ -108,7 +108,13 @@ experience that can be granularly controlled using `cargo` features.
 ## Changes
 
 **Version 0.4**
-* **Breaking Change**: TODO:
+* **Breaking Change**: Removed `known` feature - regions, services, and partitions are now
+strongly typed by default
+* **Breaking Change**: Updated `AccountIdentifier` to support non-standard AWS account IDs (e.g. AWS-managed resources)
+* **Breaking Change**: Updated `Error` to `ArnError`
+* **Breaking Change**: Renamed `serde_support` feature to `serde`
+* Added support for services with multiple identifiers
+* Added AWS service(s)
 
 **Version 0.3.1**
 
